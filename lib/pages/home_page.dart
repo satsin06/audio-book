@@ -12,14 +12,7 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  bool isLoading = false;
-  late Future<List<Artist>> futureArtist;
-  @override
-  void initState() {
-    super.initState();
-    futureArtist = fetchArtist();
-  }
-
+  
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -29,7 +22,7 @@ class _HomePageState extends State<HomePage> {
         ),
         body: Center(
           child: FutureBuilder<List<Artist>>(
-            future: futureArtist,
+            future: fetchArtist(),
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
                 return const ShimmerEffect();
@@ -41,12 +34,20 @@ class _HomePageState extends State<HomePage> {
                   child: ListView.builder(
                       itemCount: data!.length,
                       itemBuilder: (context, index) {
+                        Artist artistData = data[index];
+                        print(artistData.artworkUrl100);
                         return ExpansionTile(
-                            title: Text(data[index].artistName),
-                            children: [
-                              Text('Check')
-                            ],
-                            );
+                          title: Text(artistData.artistName),
+                          children: [
+                            ListTile(
+                                leading: Image(
+                              image: NetworkImage(artistData.artworkUrl100),
+                            ),
+                            title: Text(artistData.collectionName),
+                            subtitle: Text(artistData.description),
+                            )
+                          ],
+                        );
                       }),
                 );
               }
