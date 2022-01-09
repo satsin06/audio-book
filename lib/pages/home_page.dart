@@ -22,7 +22,7 @@ class _HomePageState extends State<HomePage> {
         ),
         body: Center(
           child: FutureBuilder<List<Artist>>(
-            future: fetchArtist(),
+            future: getArtist(),
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
                 return const ShimmerEffect();

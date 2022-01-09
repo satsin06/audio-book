@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 
 class Artist {
   Artist({
@@ -67,20 +68,59 @@ class Artist {
         releaseDate: DateTime.parse(json["releaseDate"]),
         primaryGenreName: json["primaryGenreName"].toString(),
         previewUrl: json["previewUrl"].toString(),
-        description: json["description"]?.toString()?? '',
+        description: json["description"]?.toString() ?? '',
       );
+  Map<String, dynamic> toJson() => {
+        "wrapperType": wrapperType,
+        "artistId": artistId,
+        "collectionId": collectionId,
+        "artistName": artistName,
+        "collectionName": collectionName,
+        "collectionCensoredName": collectionCensoredName,
+        "artistViewUrl": artistViewUrl,
+        "collectionViewUrl": collectionViewUrl,
+        "artworkUrl60": artworkUrl60,
+        "artworkUrl100": artworkUrl100,
+        "collectionPrice": collectionPrice,
+        "collectionExplicitness": collectionExplicitness,
+        "trackCount": trackCount,
+        "copyright": copyright,
+        "country": country,
+        "currency": currency,
+        "releaseDate": releaseDate.toIso8601String(),
+        "primaryGenreName": primaryGenreName,
+        "previewUrl": previewUrl,
+        "description": description,
+      };
 }
 
-Future<List<Artist>> fetchArtist() async {
+Future<void> fetchArtist() async {
   final response = await http.get(Uri.parse(
       'https://run.mocky.io/v3/2abb5b4e-b46b-4b0d-a7ba-a20eb394782a'));
   print(response.statusCode);
   if (response.statusCode == 200) {
     Map jsonResponse = json.decode(response.body);
-    return jsonResponse['results']
-        .map<Artist>((data) => Artist.fromJson(data))
+    List<String> artists = jsonResponse['results']
+        .map<String>((data) => json.encode(data))
         .toList();
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    prefs.setStringList('artists', artists);
   } else {
     throw Exception('Failed to load list');
   }
+}
+
+Artist artistFromJson(String str) => Artist.fromJson(json.decode(str));
+
+String artistToJson(Artist data) => json.encode(data.toJson());
+
+Future<List<Artist>> getArtist() async {
+  await fetchArtist();
+  final SharedPreferences prefs = await SharedPreferences.getInstance();
+  final jsonList = prefs.getStringList('artists');
+  List<Artist> artist = [];
+  if (jsonList != null) {
+    artist = jsonList.map((e) => artistFromJson(e)).toList();
+  }
+  return artist;
 }

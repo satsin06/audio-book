@@ -13,11 +13,12 @@ class ShimmerEffect extends StatelessWidget {
         highlightColor: Colors.grey.shade100,
         child: ListView.builder(
           itemBuilder: (_, __) => (dummyListViewCell()),
-          itemCount: 10,
+          itemCount: MediaQuery.of(context).size.height ~/ 50,
         ),
       ),
     );
   }
+
   Widget dummyListViewCell() {
     return Padding(
       padding: const EdgeInsets.only(bottom: 8.0),
